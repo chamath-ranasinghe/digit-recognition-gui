@@ -11,7 +11,10 @@ def predict_digit(img):
     img = np.array(img)
     #reshaping for model normalization
     img = img.reshape(1,28,28,1)
-    img = img/255.0
+    img = img/255.0 
+
+    img = np.expand_dims(img, axis=-1)  # Add channel dimension (e.g., (28, 28, 1))
+
     #predicting the class
     res = model.predict([img])[0]
     return np.argmax(res), max(res)
