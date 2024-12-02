@@ -1,10 +1,27 @@
 from keras.models import load_model
 import tkinter as tk
-import win32gui
-from PIL import ImageGrab, Image
+import tempfile
+import os
+from PIL import ImageGrab, Image, ImageDraw
 import numpy as np
 
 model = load_model('mnist.keras')
+
+def canvas_to_image(canvas):
+    # Generate the canvas content as a postscript (EPS)
+    ps = canvas.postscript(colormode='color')
+    
+    # Create a temporary file to save the postscript data
+    with tempfile.NamedTemporaryFile(suffix=".ps", delete=False) as temp_file:
+        temp_file.write(ps.encode())  # Write the postscript data to the file
+        temp_file.close()  # Close the temporary file
+        
+        # Open the saved postscript file using Pillow
+        img = Image.open(temp_file.name)
+    
+    # Clean up the temporary file after use
+    
+    return img,temp_file.name
 
 def predict_digit(img):
     #resize image to 28x28 pixels
@@ -39,11 +56,15 @@ class App(tk.Tk):
     def clear_all(self):
         self.canvas.delete("all")
     def classify_handwriting(self):
-        Hd = self.canvas.winfo_id() # to fetch the handle of the canvas
-        rect = win32gui.GetWindowRect(Hd) # to fetch the edges of the canvas
-        im = ImageGrab.grab(rect)
+        #Hd = self.canvas.winfo_id() # to fetch the handle of the canvas
+        #rect = win32gui.GetWindowRect(Hd) # to fetch the edges of the canvas
+        #im = ImageGrab.grab(rect)
+
+        im, file_name = canvas_to_image(self.canvas)
+        im.show()
         digit, acc = predict_digit(im)
         self.label.configure(text= str(digit)+', '+ str(int(acc*100))+'%')
+        os.remove(file_name)
     def draw_lines(self, event):
         self.x = event.x
         self.y = event.y

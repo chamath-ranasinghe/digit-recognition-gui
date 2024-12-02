@@ -1,0 +1,4 @@
+venv
+backend/__pycache__
+mnist.h5
+mnist.keras
